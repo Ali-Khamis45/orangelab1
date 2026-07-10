@@ -1,0 +1,130 @@
+========================================================================
+         HR EMPLOYEE PERFORMANCE, ENGAGEMENT & TRAINING ANALYTICS
+                         PROJECT DOCUMENTATION
+========================================================================
+
+Author: Senior Data Scientist / Technical Writer
+Date: July 2026
+
+------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY
+------------------------------------------------------------------------
+This document provides comprehensive documentation for the HR Dataset Analysis
+project. The project profiles 3,000+ employee records, tracking their employment
+histories, performance scores, engagement levels, training costs, and work-life
+balance. The findings offer human resources managers and executive teams 
+data-backed guidance for improving corporate learning programs, enhancing employee
+performance, and analyzing employee retention patterns.
+
+------------------------------------------------------------------------
+2. DATA CLEANSING & PREPROCESSING PIPELINE
+------------------------------------------------------------------------
+Raw HR data contains errors, missing values, and duplication. We designed
+and executed a robust data cleaning pipeline:
+
+A. Date Parsing:
+   Dates were originally loaded as string objects. We parsed the following
+   fields to standard datetime format (YYYY-MM-DD):
+   - StartDate (e.g., "20-Sep-19" -> "2019-09-20")
+   - ExitDate (includes NaT for active employees)
+   - DOB (Date of Birth)
+   - Training Date
+   - Survey Date
+
+B. Null Value Pruning:
+   - Analysis of null percentages revealed that the "Survey Date" column was
+     missing in 100% of records.
+     Reasoning: Retaining empty columns increases memory overhead and introduces
+     noise. The column was dropped permanently.
+   - Other columns with partial missing values (like ExitDate) were retained to
+     avoid losing records for active employees.
+
+C. Deduplication:
+   - Duplicate records skew statistical measures (mean, variance) and lead to
+     inaccurate counts.
+   - We audited and removed duplicate records. The duplicate count was reduced
+     from the initial level to exactly zero.
+   - The cleaned dataset was saved as "cleaned_data_HR.csv".
+
+------------------------------------------------------------------------
+3. HR DATASET DICTIONARY
+------------------------------------------------------------------------
+Key attributes analyzed in this project:
+- FirstName / LastName : Employee identification.
+- StartDate / ExitDate : Date of hire and date of termination (if applicable).
+- Title                : Job title (e.g., Production Technician, Sales Manager).
+- Supervisor           : Name of the employee's direct supervisor.
+- ADEmail              : Active Directory corporate email address.
+- BusinessUnit         : Division of the company (e.g., CCDR, EW, PL, TNS).
+- EmployeeStatus       : Current status (Active, Voluntarily Terminated, etc.).
+- DepartmentType       : Specific department (Production, Sales, IT, Admin).
+- Current Employee Rating: Performance rating score (typically 1 to 5).
+- Engagement Score     : Employee engagement survey score (typically 1 to 5).
+- Satisfaction Score   : Job satisfaction survey score (typically 1 to 5).
+- Work-Life Balance Score: Work-life balance survey score (typically 1 to 5).
+- Training Program Name: Name of training program completed.
+- Training Cost        : Direct cost of the training course ($).
+- Training Duration    : Number of days training lasted.
+
+------------------------------------------------------------------------
+4. KEY STATISTICAL FINDINGS
+------------------------------------------------------------------------
+A. Baseline Metrics (Entire Dataset):
+   - Average Employee Performance Rating: 2.97 out of 5.0
+   - Maximum Employee Performance Rating: 5.0
+   - Average Employee Engagement Score:   2.94 out of 5.0
+
+B. Department Performance Rankings:
+   The departments ranked by their mean employee performance ratings:
+   1. Billing            : 3.50 (Highest average performance)
+   2. Data Analyst       : 3.29
+   3. Executive Office   : 3.12
+   4. Production         : 3.01
+   5. Software Engineering: 3.00
+   6. HR                 : 2.92
+   7. IT Support         : 2.91
+   8. Finance            : 2.76
+   9. Sales              : 2.72 (Lowest average performance)
+
+C. Job Satisfaction by Business Unit:
+   Average satisfaction scores across major business units show consistency,
+   ranging between 2.90 and 3.05 out of 5.0.
+
+D. Correlation Analysis:
+   - Engagement Score vs. Satisfaction Score:
+     Correlation (r) = 0.0167 (Very weak positive relationship)
+     Takeaway: Employees who score high on engagement surveys do not necessarily
+     report high job satisfaction, and vice versa. HR should investigate both
+     metrics independently.
+   - Training Duration (Days) vs. Current Employee Rating:
+     Correlation (r) = -0.0219 (Very weak negative relationship)
+     Takeaway: The duration of training has no positive influence on employee
+     performance ratings. Training quality or curriculum alignment may need
+     restructuring.
+
+E. Peak Training Cost Event:
+   - The highest recorded training cost for a single employee training program
+     was identified. HR should audit this program to verify if it yielded a
+     commensurate return on investment (ROI).
+
+------------------------------------------------------------------------
+5. VISUALIZATION INSIGHTS
+------------------------------------------------------------------------
+A. Department Type Distribution (Donut Chart):
+   Reveals the headcount breakdown by department, showing that the largest
+   employee groups are concentrated in Production and IT/Engineering roles.
+
+B. Employee Ratings (Polished Histogram with KDE):
+   Displays a close-to-normal distribution of performance scores centered
+   around the 3.0 mark, indicating a balanced performance review process
+   without severe ratings inflation.
+
+C. Training Costs by Program (Horizontal Boxplot):
+   Visually highlights the cost spread of different training programs. Programs
+   like "Leadership Development" and "Project Management" show varying median costs,
+   with outliers representing high-cost outlier sessions.
+
+D. Employee Status by Business Unit (Grouped Countplot):
+   Visualizes workforce stability across divisions. Useful for identifying
+   divisions that have high termination ratios, which might point to cultural,
+   compensation, or management challenges in specific business units.
