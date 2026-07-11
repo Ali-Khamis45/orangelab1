@@ -65,7 +65,25 @@ The Random Forest model calculates feature importances based on mean decrease in
 
 ---
 
-## 5. Senior-Level HR Recommendations
+## 5. Deployment: The Talent Attrition Advisor Web UI
+
+To make the predictive models useful for daily HR operations, we serialized the best model (Balanced Logistic Regression) and scaler, and built an interactive web dashboard:
+* **The Backend (`server.py`):** A lightweight Flask backend that receives input profiles, transforms and scales them in-place, runs the model, computes risk weights, and sends a JSON response.
+* **The Frontend (`static/index.html`):** An elegant, single-page glassmorphism dashboard that allows HR users to easily input parameters using sliders and dropdowns. It renders:
+  1. A colored circular **Risk Gauge** showing churn probability.
+  2. Relative **contribution bars** showing exactly which parameters are driving risk.
+  3. Dynamic, **actionable recommendations** for HR supervisors based on the profile.
+
+### Testing and Launching locally:
+Start the server from the repository root:
+```bash
+python server.py
+```
+Open your browser and navigate to: [http://127.0.0.1:5000/](http://127.0.0.1:5000/)
+
+---
+
+## 6. Senior-Level HR Recommendations
 
 1. **Implement Milestones-Based Retention:** Since **Tenure** is the #1 driver, HR must design specific intervention programs at key career milestones (e.g., standard reviews at 1 year and 3 years) when employees are statistically most likely to leave.
 2. **Focus on Early-Career Employees:** Since **Age** is a major driver, create structured career paths and mentoring programs tailored to younger hires who have higher base mobility.

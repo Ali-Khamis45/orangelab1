@@ -111,8 +111,14 @@ To understand the relationships between the numerical variables, we computed the
 
 ---
 
-## 6. Key Business Takeaways
+## 6. Deployment & Interaction
 
-1. **Weak Data Predictability:** Current captured HR variables do not predict employee ratings. Performance ratings are determined by other factors not captured here (e.g. manager relationship, personal motivation, project difficulty, specific KPIs, etc.).
-2. **Reviewing Training & Satisfaction:** Training costs, duration, and satisfaction do not drive ratings. HR should re-evaluate how performance evaluations are structured and what metrics are used.
+The models trained in this project are deployed via a web-based **Talent Attrition Advisor Dashboard** (`server.py`). Users can input custom profiles to generate real-time churn predictions, weight contributions, and action items. See the setup guide in the `README.md` to launch the server locally.
+
+---
+
+## 7. Key Business Takeaways
+
+1. **HR Data Weak Predictability:** The features currently captured in the HR dataset (demographics, job titles, business units, and baseline survey scores) **do not have a predictive relationship** with employee performance ratings. This suggests that performance ratings are determined by other factors not captured here (e.g. manager relationship, personal motivation, project difficulty, specific KPIs, etc.).
+2. **Reviewing Training & Satisfaction:** The model results confirm the EDA correlation findings. Training costs, duration, and employee satisfaction do not drive employee ratings. HR should re-evaluate how performance evaluations are structured and what metrics are used.
 3. **Data Quality & Feature Engineering:** To build a predictive model that successfully forecasts performance or retention, HR must capture more relevant behavioral features, such as number of projects completed, average feedback scores, attendance rates, or peer reviews.

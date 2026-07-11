@@ -57,3 +57,8 @@ We split the 3,000-record dataset into:
 ### Fixed Random State (`random_state=42`):
 * **Why:** Splitting data involves a random number generator. If we do not fix the seed, every time we run the notebook we will get a slightly different training set and test set. This makes model comparison impossible since the metrics (MSE, Accuracy) would fluctuate simply due to random partition chance.
 * **The Choice of 42:** `42` is a standard, widely accepted seed value in the machine learning community (originally an homage to *The Hitchhiker's Guide to the Galaxy*). It guarantees that the data partition remains identical across different machines and executions.
+
+---
+
+## 5. Actionable Dashboard
+The feature selection, scaling, and classification methodologies described above are deployed in the **Talent Attrition Advisor Web UI** (`static/index.html`). This allows HR users to dynamically test the impact of scaling, training, satisfaction, and tenure on real-time prediction probabilities.
