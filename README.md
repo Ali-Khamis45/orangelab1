@@ -1,44 +1,88 @@
-# HR Employee Performance, Engagement & Training Analytics
+# 📊 HR Employee Performance, Engagement & Talent Attrition Analytics
 
-An end-to-end data cleaning, exploratory data analysis (EDA), and advanced visualization workflow analyzing corporate HR records. This project identifies critical performance drivers, reviews training program costs, and provides data-driven recommendations for HR managers and business stakeholders.
+An end-to-end data cleaning, exploratory data analysis (EDA), and machine learning workflow analyzing 3,000+ employee records. This repository implements predictive models for employee performance and **talent attrition (churn)**, identifies key organizational drivers, and translates data insights into actionable HR retention strategies.
 
----
-
-## 📋 Table of Contents
-1. [Overview](#-overview)
-2. [Project Structure](#-project-structure)
-3. [Installation & Setup](#-installation--setup)
-4. [Workflow Execution Phases](#-workflow-execution-phases)
-5. [Key Analytics & Insights](#-key-analytics--insights)
-6. [Advanced Visualizations Summary](#-advanced-visualizations-summary)
-7. [Business Recommendations](#-business-recommendations)
+<a href="https://colab.research.google.com/github/Ali-Khamis45/orangelab1/blob/main/taskLAB1orange.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+![Python Version](https://img.shields.style/badge/Python-3.12-blue.svg)
+![License](https://img.shields.style/badge/License-MIT-green.svg)
 
 ---
 
-## 🔍 Overview
-This project profiles employee records to extract actionable intelligence regarding corporate department performance, training efficiency, workforce status, and job satisfaction. The analysis is structured to ensure that data anomalies (missing values, improper types, duplicate entries) are systematically resolved before computing statistical insights.
+## 💡 The Business Context: Why This Project Matters
+In any modern corporation, people are the most valuable asset. Replacing an employee who leaves (turnover) incurs massive recruitment, onboarding, and productivity costs—often representing 50% to 200% of the employee's annual salary. 
 
-Key highlights of the repository include:
-* **Integrity First**: Standardized datetime objects, handled duplicates, and filtered out high-null columns (`Survey Date`).
-* **Granular Aggregations**: Explored metrics across genders, departments, and business units.
-* **Production-Grade Visuals**: Created publication-ready data plots including custom donut charts, box plots, and styled histograms.
-* **Actionable Rationale**: In-depth text annotations explaining the "why" and "how" behind every line of code.
+While HR departments traditionally rely on intuition and yearly performance evaluations to assess employee performance and churn risks, this project takes a **data-driven approach**. We audit raw HR profiles, identify performance and engagement relationships, build predictive models, and extract key features driving employee turnover to help HR stakeholders make proactive, strategic decisions.
 
 ---
 
-## 📂 Project Structure
-```bash
-├── taskLAB1orange.ipynb       # Documented Jupyter Notebook containing full EDA & code cells
-├── cleaned_data_HR.csv        # Cleaned dataset exported post-preprocessing
-├── documentation.txt          # In-depth analysis report of metrics and cleaning methodologies
-└── implementation_details.txt # Technical documentation of execution flow and dependencies
-```
+## 📂 Repository Structure
+* [taskLAB1orange.ipynb](file:///d:/orange/4/orangelab1/taskLAB1orange.ipynb): Complete Jupyter notebook containing data cleaning, visualisations, modeling, and evaluation.
+* [ml_performance_report.md](file:///d:/orange/4/orangelab1/ml_performance_report.md): Comparative report on Linear Regression, Random Forest, and Logistic Regression models.
+* [ml_methodology_report.md](file:///d:/orange/4/orangelab1/ml_methodology_report.md): Detailed methodology documentation explaining feature/target selections, scaling, encoding, and splitting choices.
+* [ml_attrition_report.md](file:///d:/orange/4/orangelab1/ml_attrition_report.md): Detailed classification report on predicting employee churn with ROC-AUC curves and feature importances.
+* [cleaned_data_HR.csv](file:///d:/orange/4/orangelab1/cleaned_data_HR.csv): Cleaned intermediate dataset exported post-preprocessing.
 
 ---
 
-## ⚙️ Installation & Setup
+## 🔄 End-to-End Analytics Workflow
 
-To execute the notebook and view the interactive visualizations locally:
+### Phase 1: Data Audit & Cleaning
+- Standardized custom string date formats (`StartDate`, `ExitDate`, `DOB`, `Training Date`) into standard Pandas `datetime64[ns]` objects.
+- Pruned `Survey Date` due to >99% missing values and deduplicated records to eliminate statistical bias.
+- Exported the results to `cleaned_data_HR.csv`.
+
+### Phase 2: Exploratory Data Analysis (EDA) & Visuals
+- Aggregated department performance scores (identifying **Billing** as the highest performing at `3.50` and **Sales** as the lowest at `2.72`).
+- Designed publication-ready data plots:
+  - **Department Headcount:** Donut and count charts.
+  - **Evaluation Scores:** Styled rating histograms.
+  - **Training Budgets:** Cost boxplots showing ranges and outliers.
+  - **Retention Rates:** Employee status countplots grouped by Business Unit.
+
+### Phase 3: Modeling Employee Ratings (Section 5)
+- Encoded 10 categorical columns using one-hot dummy variables, yielding **38 input features**.
+- Scaled features using `StandardScaler` to ensure solver convergence.
+- Split data 80% / 20% (train/test) with a fixed random seed (`42`).
+- Trained and evaluated three models to predict `Current Employee Rating`:
+  1. **Linear Regression (OLS)** ($R^2 \approx -0.0170$, $\text{RMSE} \approx 1.0508$)
+  2. **Random Forest Regressor** ($R^2 \approx -0.0412$, $\text{RMSE} \approx 1.0632$)
+  3. **Logistic Regression (Classification)** (Accuracy: **53.33%**)
+
+### Phase 4: Correlation Matrix Heatmap (Section 6)
+- Computed Pearson correlation coefficients for all numerical variables.
+- Visualized correlations using a heatmap (`coolwarm` palette) and scatter plots (e.g. `Training Cost` vs. `Training Duration`).
+- **Core Finding:** All numerical features have correlation values between **-0.029 and +0.032**. Since the variables are statistically independent, models predicting employee ratings from these features revert to predicting the baseline averages.
+
+### Phase 5: Advanced Attrition Prediction (Section 7)
+- **Advanced Feature Engineering:** Extracted `Age` and `Tenure` (employment duration in years) from raw timestamps.
+- **Attrition Target:** Defined a binary target `Is_Terminated` (1 if terminated, 0 if active).
+- **Class Balancing:** Addressed the 87% / 13% class imbalance using `class_weight='balanced'` in training.
+- **Classification Modeling:** Trained balanced Logistic Regression and Random Forest Classifiers.
+- **Key Metrics:** Balanced Logistic Regression achieved an **excellent ROC-AUC of 0.8121** and a **recall of 78% for attrition**, successfully flagging 78% of employees at risk of leaving!
+- **Feature Importances & ROC Curves:** Plotted side-by-side ROC curve comparisons and a barplot showing the top 10 Random Forest feature importances.
+
+---
+
+## 📈 Key Attrition Driver Insights (Random Forest)
+
+The model identified the top structural drivers of employee churn:
+1. **Tenure (20.08% Importance):** Employees are highly likely to leave at specific milestones in their lifecycle (e.g. after 1-2 years or when reaching retirement).
+2. **Training Cost (10.55% Importance):** Suggests that employees who receive higher direct training investment are significantly better retained.
+3. **Age (9.61% Importance):** Younger employees exhibit much higher baseline mobility than older, settled employees.
+4. **Onboarding Duration (4.53% Importance):** Longer training duration correlates with higher retention.
+
+---
+
+## 🏢 Strategic HR Recommendations
+1. **Design Milestone-Based Interventions:** Focus retention check-ins at critical tenure milestones (e.g. standard reviews at 1 year and 3 years) when employees are statistically most likely to leave.
+2. **Tailor Mentorship for Younger Hires:** Since younger age is a primary driver of churn, establish clear career progression paths and peer mentorship for early-career hires.
+3. **Implement Churn Dashboard:** Deploy the **Balanced Logistic Regression model** as a retention warning tool. Since it successfully flags **78% of potential resignations**, HR can proactively offer salary reviews, work-life balance adjustments, or department changes before high-risk employees resign.
+
+---
+
+## ⚙️ Installation & Local Setup
+
+To run the notebook and view the interactive visualizations locally:
 
 1. **Clone the repository**:
    ```bash
@@ -47,9 +91,8 @@ To execute the notebook and view the interactive visualizations locally:
    ```
 
 2. **Install required libraries**:
-   Ensure you have Python 3 installed. Install dependencies using `pip`:
    ```bash
-   pip install pandas numpy matplotlib seaborn
+   pip install pandas numpy scikit-learn matplotlib seaborn jupyter
    ```
 
 3. **Launch the notebook server**:
@@ -57,50 +100,3 @@ To execute the notebook and view the interactive visualizations locally:
    jupyter notebook
    ```
    Open `taskLAB1orange.ipynb` in your browser.
-
----
-
-## 🔄 Workflow Execution Phases
-
-### Phase 1: Data Audit & Cleansing
-* Loaded the raw `HR_Dataset.csv` dataset.
-* Checked dataset dimensions (columns/rows), surveyed data types, and compiled missing values.
-* Pruned the `Survey Date` column (missing >99% of values).
-* Converted string columns (`StartDate`, `ExitDate`, `DOB`, `Training Date`) into standard Pandas `datetime64[ns]` objects.
-* Audited and dropped all duplicate records to avoid statistical bias.
-* Exported the resulting dataframe to `cleaned_data_HR.csv`.
-
-### Phase 2: Descriptive & Grouped Aggregations
-* Evaluated corporate baseline stats (average employee rating: `2.97`, average engagement: `2.94`).
-* Calculated mean performance ratings across departments and satisfaction across business units.
-* Analyzed average budget spending on different corporate training programs.
-* Checked for gender differences in work-life balance scores.
-
-### Phase 3: Visual Analytics
-* **Donut Chart**: Shows the distribution of employees across departments.
-* **Countplots**: Displays department sizes and status (Active/Terminated) by Business Unit.
-* **Histograms**: Plots the shape of employee performance ratings.
-* **Boxplots**: Compares training program costs, highlighting outliers and budget ranges.
-
----
-
-## 💡 Key Analytics & Insights
-* **Top Department by Performance Rating**: The **Billing** department holds the highest average performance rating (`3.50`), whereas the **Sales** department holds the lowest (`2.72`).
-* **Morale vs. Satisfaction**: There is a weak positive Pearson correlation (`0.0167`) between employee `Engagement Score` and `Satisfaction Score`, showing that engagement and satisfaction do not necessarily move in lockstep.
-* **Training and Performance**: There is a small negative correlation (`-0.0219`) between the training duration (in days) and the employee's final performance rating, suggesting that longer training courses do not automatically lead to better job performance ratings.
-
----
-
-## 📈 Advanced Visualizations Summary
-The project includes several key charts built using Seaborn and Matplotlib:
-1. **Department Type Distribution**: A clean donut chart showing the percentage of employees in each department.
-2. **Current Employee Rating Distribution**: A polished histogram showing performance evaluation scores.
-3. **Training Cost Distribution by Program**: A horizontal boxplot showing cost distributions, median spends, and outliers across programs.
-4. **Employee Status by Business Unit**: A grouped horizontal countplot displaying active versus terminated employees in each business division.
-
----
-
-## 🏢 Business Recommendations
-1. **Investigate Training Curriculum**: Since longer training durations do not correlate with higher performance ratings, review course content to ensure it aligns with day-to-day employee responsibilities.
-2. **Review Sales Department Support**: Since the Sales department has the lowest average employee performance rating, HR should review sales training, targets, and supervisor support.
-3. **Analyze Business Unit Retention**: Use the Business Unit countplot to identify divisions with high termination rates and target them for retention strategies.
