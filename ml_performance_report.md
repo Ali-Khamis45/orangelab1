@@ -4,62 +4,89 @@ This report provides a detailed comparison of three machine learning models trai
 
 ---
 
-## 1. Preprocessing and Modeling Setup
+## 1. Targets and Features by Model
 
-To prepare the dataset for machine learning:
-1. **Target ($y$):** `Current Employee Rating` (representing employee performance, discrete integer scale of 1 to 5).
-2. **Feature Engineering & Selection:**
-   - **Numerical Features (5):** `Engagement Score`, `Satisfaction Score`, `Work-Life Balance Score`, `Training Duration(Days)`, `Training Cost`.
-   - **Categorical Features (10):** `GenderCode`, `MaritalDesc`, `RaceDesc`, `DepartmentType`, `BusinessUnit`, `EmployeeType`, `PayZone`, `EmployeeClassificationType`, `Training Type`, `Training Program Name`.
-3. **One-Hot Encoding:** All categorical text features were converted to standard numeric dummy variables (0 or 1), yielding a total of **38 features**.
-4. **Standard Scaling:** Features were normalized using `StandardScaler`. This transforms features to have a mean of 0 and variance of 1. Normalization is critical for models like Logistic Regression to prevent variables with large values (like `Training Cost`) from causing numerical instability and convergence failure.
-5. **Train-Test Split:** The dataset was split into **80% training set** (2,400 records) and **20% testing set** (600 records) using a fixed random state (`42`) to ensure reproducibility.
+For all three models, we established the following training setup:
+
+* **Target Variable ($y$):** `Current Employee Rating` (representing employee performance, discrete integer scale of 1 to 5).
+  - For **Linear Regression** and **Random Forest Regressor**, the target is treated as a continuous numeric variable (Regression).
+  - For **Logistic Regression**, the target is treated as a discrete class label (Multi-class Classification).
+
+* **Input Features ($X$):**
+  A total of 15 features (5 numerical, 10 categorical) were selected. One-hot encoding of the categorical features yielded **38 engineered input columns** fed into the models:
+
+| Feature Type | Base Column Name | Engineered Columns after One-Hot Encoding |
+| :--- | :--- | :--- |
+| **Numerical** | `Engagement Score` | `Engagement Score` |
+| | `Satisfaction Score` | `Satisfaction Score` |
+| | `Work-Life Balance Score` | `Work-Life Balance Score` |
+| | `Training Duration(Days)` | `Training Duration(Days)` |
+| | `Training Cost` | `Training Cost` (scaled) |
+| **Categorical** | `GenderCode` | `GenderCode_Male` |
+| | `MaritalDesc` | `MaritalDesc_Married`, `MaritalDesc_Single`, `MaritalDesc_Widowed` |
+| | `RaceDesc` | `RaceDesc_Black`, `RaceDesc_Hispanic`, `RaceDesc_Other`, `RaceDesc_White` |
+| | `DepartmentType` | `DepartmentType_Billing`, `DepartmentType_Data Analyst`, `DepartmentType_Executive Office`, `DepartmentType_Finance`, `DepartmentType_HR`, `DepartmentType_IT Support`, `DepartmentType_Production`, `DepartmentType_Software Engineering` |
+| | `BusinessUnit` | `BusinessUnit_BPC`, `BusinessUnit_CCDR`, `BusinessUnit_EW`, `BusinessUnit_MSC`, `BusinessUnit_NEL`, `BusinessUnit_PL`, `BusinessUnit_PYZ`, `BusinessUnit_SVG`, `BusinessUnit_TNS` |
+| | `EmployeeType` | `EmployeeType_Full-Time`, `EmployeeType_Part-Time` |
+| | `PayZone` | `PayZone_Zone B`, `PayZone_Zone C` |
+| | `EmployeeClassificationType` | `EmployeeClassificationType_Part-Time`, `EmployeeClassificationType_Temporary` |
+| | `Training Type` | `Training Type_Internal` |
+| | `Training Program Name` | `Training Program Name_Customer Service`, `Training Program Name_Leadership Development`, `Training Program Name_Project Management`, `Training Program Name_Technical Skills` |
 
 ---
 
-## 2. Explanation of the Models
+## 2. Preprocessing & Scaling
+
+1. **One-Hot Encoding:** Categorical variables were converted to dummy variables (0/1).
+2. **Standard Scaling:** Features were normalized using `StandardScaler`. This shifts feature values to have a mean of 0 and variance of 1. Scaling is critical to ensure the Logistic Regression optimizer converges and prevents columns with large magnitudes (like `Training Cost`) from dominating predictions.
+3. **Train-Test Split:** Split into **80% training set** (2,400 records) and **20% testing set** (600 records) using random state `42` for reproducibility.
+
+---
+
+## 3. Correlation Matrix Analysis (Specifically with Training Cost)
+
+To understand the relationships between the numerical variables, we computed the Pearson correlation matrix:
+
+| Variable | Current Employee Rating | Engagement Score | Satisfaction Score | Work-Life Balance Score | Training Duration(Days) | Training Cost |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Current Employee Rating** | 1.0000 | 0.0214 | -0.0291 | 0.0324 | 0.0041 | **0.0091** |
+| **Engagement Score** | 0.0214 | 1.0000 | -0.0076 | 0.0182 | 0.0090 | **0.0214** |
+| **Satisfaction Score** | -0.0291 | -0.0076 | 1.0000 | -0.0247 | 0.0185 | **-0.0029** |
+| **Work-Life Balance Score** | 0.0324 | 0.0182 | -0.0247 | 1.0000 | 0.0059 | **0.0023** |
+| **Training Duration(Days)** | 0.0041 | 0.0090 | 0.0185 | 0.0059 | 1.0000 | **-0.0103** |
+| **Training Cost** | **0.0091** | **0.0214** | **-0.0029** | **0.0023** | **-0.0103** | **1.0000** |
+
+### Key Takeaways from Correlation Analysis:
+* **Training Cost Correlations:**
+  - `Training Cost` vs `Current Employee Rating`: **0.0091** (virtually zero correlation).
+  - `Training Cost` vs `Training Duration`: **-0.0103** (virtually zero correlation).
+  - `Training Cost` vs `Engagement Score`: **0.0214** (virtually zero correlation).
+  - `Training Cost` vs `Satisfaction Score`: **-0.0029** (virtually zero correlation).
+  - `Training Cost` vs `Work-Life Balance Score`: **0.0023** (virtually zero correlation).
+* **Overall Pattern:** Every single correlation coefficient between the numerical variables falls between **-0.029 and +0.032**. This indicates that **none of the numerical features have any linear relationship with each other**. They behave as independent random distributions, which explains the low predictive capabilities of our machine learning models.
+
+---
+
+## 4. Explanation of the Models
 
 ### A. Linear Regression (OLS)
-Linear Regression is a statistical regression model that models the relationship between a scalar dependent target ($y$) and one or more independent features ($X$) by fitting a linear equation to the observed data.
-* **How it works:** It finds the optimal line (hyperplane) that minimizes the sum of squared residuals (errors) between the actual and predicted targets.
-* **Strengths:**
-  - Highly interpretable: Coefficients directly indicate the size and direction of feature effects.
-  - Computationally efficient: Trains almost instantaneously.
-  - Scale-invariant in predictions (though scaling helps compare coefficients directly).
-* **Weaknesses:**
-  - Assumes a linear relationship between features and target.
-  - Sensitive to outliers.
-  - Predicts continuous float values (e.g. 2.76), meaning predictions must be rounded if integer class labels are required.
+* **How it works:** Fits a linear equation ($y = \beta_0 + \beta_1 X_1 + ...$) by minimizing the sum of squared errors between actual and predicted scores.
+* **Strengths:** Highly interpretable coefficients; extremely fast training.
+* **Weaknesses:** Assumes linear relationships; cannot model complex patterns; outputs continuous float numbers that must be rounded for class ratings.
 
 ### B. Random Forest Regressor
-Random Forest is a non-linear ensemble learning method that builds a forest of multiple decision trees and merges their predictions to get a more accurate and stable prediction.
-* **How it works:** It trains $N$ (e.g., 100) independent decision trees using random subsets of features and samples (bootstrap aggregating). The final prediction is the average of the predictions from all trees.
-* **Strengths:**
-  - Captures complex, non-linear relationships and high-order interactions between features without manual feature engineering.
-  - Robust to outliers and scale-invariant.
-  - Built-in feature selection: less prone to overfitting than single decision trees.
-* **Weaknesses:**
-  - Low interpretability ("black-box" model).
-  - High memory usage and slower training times on massive datasets.
-  - Cannot extrapolate predictions outside the range of the training data.
+* **How it works:** Fits an ensemble of 100 decision trees on bootstrapped training subsets and averages their predictions.
+* **Strengths:** Captures complex non-linear combinations and interactions of features; robust to scale and outliers.
+* **Weaknesses:** Poor interpretability ("black-box"); prone to overfitting on uncorrelated data; high memory footprint.
 
 ### C. Logistic Regression (Multi-class Classification)
-Despite its name, Logistic Regression is a linear model used for classification. In a multi-class setting, it calculates probabilities using the multinomial/softmax function.
-* **How it works:** It fits linear boundary equations to separate each class and maps the output to a probability distribution over the classes (1 to 5). The class with the highest probability is predicted.
-* **Strengths:**
-  - Provides probability estimates for each class, rather than just a single hard prediction.
-  - Computationally efficient and very fast to train.
-  - Less prone to overfitting in low-dimensional spaces if regularized.
-* **Weaknesses:**
-  - Assumes linear decision boundaries.
-  - Sensitive to multicollinearity and requires feature scaling (otherwise solvers fail to converge).
-  - Struggles with highly complex non-linear decision boundaries.
+* **How it works:** Calculates class probabilities for classes 1 to 5 using the multinomial (softmax) function.
+* **Strengths:** Predicts probability distributions over ratings; very fast to train.
+* **Weaknesses:** Assumes linear boundary lines; sensitive to unscaled inputs (converges slowly or fails without scaling); cannot model complex non-linear decision boundaries.
 
 ---
 
-## 3. Performance Metrics Comparison
-
-After training the models on the training set, we evaluated them on the test set (600 records).
+## 5. Performance Metrics Comparison
 
 ### Regression Models (Continuous Predictions)
 
@@ -69,39 +96,23 @@ After training the models on the training set, we evaluated them on the test set
 | **Root Mean Squared Error (RMSE)** | 1.0508 | 1.0632 |
 | **R-squared ($R^2$) Score** | -0.0170 | -0.0412 |
 
-* **Analysis:**
-  - An $R^2$ score of 0 or below indicates that the features do not explain the variance of the performance rating.
-  - The RMSE of $\approx 1.05$ shows that, on average, the regression predictions deviate from the true performance rating (1 to 5 scale) by approximately 1 rating unit.
-  - The Random Forest Regressor has a slightly worse $R^2$ score than the Linear Regression model, indicating that trying to fit complex non-linear combinations of weakly correlated features introduced noise/overfitting.
+* **Analysis:** The $R^2$ scores are negative/near-zero, showing that the features do not explain the target variance. 
 
-### Classification Model (Discrete Class Predictions)
+### Classification Model (Discrete Predictions)
 
 * **Model:** Logistic Regression
 * **Classification Accuracy:** **53.33%** (320 correct predictions out of 600)
 
-**Classification Report:**
-```
-              precision    recall  f1-score   support
-
-           1       0.00      0.00      0.00        65
-           2       0.23      0.12      0.16        90
-           3       0.57      0.97      0.72       313
-           4       0.25      0.05      0.09        75
-           5       0.00      0.00      0.00        57
-
-    accuracy                           0.53       600
-   macro avg       0.21      0.23      0.19       600
-   weighted avg       0.36      0.53      0.41       600
-```
-
-* **Analysis:**
-  - The overall accuracy is 53.33%. However, the precision and recall scores show that the model is predicting class `3` (the majority class) for almost all records (recall for class 3 is 97%, and recall for class 1 and 5 is 0%).
-  - This behavior occurs because the features have virtually zero statistical correlation with employee ratings. The model minimizes its cross-entropy loss by predicting the class with the highest baseline probability (class 3 represents over 52% of the test data).
+**Classification Report Summary:**
+- Precision for class 3: **57%**
+- Recall for class 3: **97%**
+- Recall for class 1 and 5: **0%**
+- **Analysis:** Since the features are uncorrelated with the target, the classification model minimizes its cross-entropy loss by predicting class `3` (the majority class representing 52% of the test set) for almost every employee.
 
 ---
 
-## 4. Key Business Takeaways
+## 6. Key Business Takeaways
 
-1. **HR Data Weak Predictability:** The features currently captured in the HR dataset (demographics, job titles, business units, and baseline survey scores) **do not have a predictive relationship** with employee performance ratings. This suggests that performance ratings are determined by other factors not captured here (e.g. manager relationship, personal motivation, project difficulty, specific KPIs, etc.).
-2. **Reviewing Training & Satisfaction:** The model results confirm the EDA correlation findings. Training costs, duration, and employee satisfaction do not drive employee ratings. HR should re-evaluate how performance evaluations are structured and what metrics are used.
+1. **Weak Data Predictability:** Current captured HR variables do not predict employee ratings. Performance ratings are determined by other factors not captured here (e.g. manager relationship, personal motivation, project difficulty, specific KPIs, etc.).
+2. **Reviewing Training & Satisfaction:** Training costs, duration, and satisfaction do not drive ratings. HR should re-evaluate how performance evaluations are structured and what metrics are used.
 3. **Data Quality & Feature Engineering:** To build a predictive model that successfully forecasts performance or retention, HR must capture more relevant behavioral features, such as number of projects completed, average feedback scores, attendance rates, or peer reviews.
