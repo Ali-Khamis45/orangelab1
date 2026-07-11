@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Talent Attrition Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary-accent: #6366f1; /* Indigo */
+            --primary-accent-rgb: 99, 102, 241;
+            --danger-accent: #de425b; /* Coral */
+            --safe-accent: #10b981; /* Emerald */
+            --chart-slate: #2b5c8f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(222, 66, 91, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        header {
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-tag {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+            padding: 0.4rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        main {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s ease;
+        }
+
+        .section-card:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--primary-accent);
+            border-radius: 4px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input[type="number"], select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-value {
+            min-width: 2rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-accent);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-accent);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-predict {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--primary-accent) 0%, #4f46e5 100%);
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .results-container.active {
+            opacity: 1;
+            justify-content: flex-start;
+            align-items: stretch;
+        }
+
+        .gauge-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .gauge-outer {
+            width: 180px;
+            height: 180px;
+            position: relative;
+        }
+
+        svg.gauge-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        circle.gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 14;
+        }
+
+        circle.gauge-fill {
+            fill: none;
+            stroke: var(--primary-accent);
+            stroke-width: 14;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gauge-percentage {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .gauge-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .risk-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .risk-high {
+            background: rgba(222, 66, 91, 0.15);
+            border-color: rgba(222, 66, 91, 0.3);
+            color: var(--danger-accent);
+            box-shadow: 0 0 15px rgba(222, 66, 91, 0.1);
+        }
+
+        .risk-low {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--safe-accent);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+        }
+
+        .factors-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .factors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .factor-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .factor-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .factor-name {
+            color: var(--text-secondary);
+        }
+
+        .factor-value {
+            font-weight: 600;
+        }
+
+        .factor-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .factor-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+        }
+
+        .advice-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .advice-box::before {
+            content: 'ADVICE';
+            position: absolute;
+            top: 6px;
+            right: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 1px;
+        }
+
+        .advice-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            .btn-predict {
+                grid-column: span 1;
+            }
+            header {
+                padding: 1rem 1.5rem;
+            }
+            main {
+                padding: 1.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HR Talent Attrition Advisor</h1>
+        <span class="header-tag">Balanced Logistic Regression v1.0</span>
+    </header>
+
+    <main>
+        <!-- Form Section -->
+        <section class="section-card">
+            <h2 class="section-title">Employee Profile Parameters</h2>
+            <form id="advisorForm">
+                
+                <!-- Age Slider -->
+                <div class="form-group">
+                    <label for="Age">Age (Years)</label>
+                    <div class="range-container">
+                        <input type="range" id="Age" name="Age" min="18" max="70" value="38" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Age_val">38</span>
+                    </div>
+                </div>
+
+                <!-- Tenure Slider -->
+                <div class="form-group">
+                    <label for="Tenure">Tenure (Years at Company)</label>
+                    <div class="range-container">
+                        <input type="range" id="Tenure" name="Tenure" min="0" max="25" step="0.5" value="5" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Tenure_val">5</span>
+                    </div>
+                </div>
+
+                <!-- Satisfaction Rating -->
+                <div class="form-group">
+                    <label for="Satisfaction Score">Job Satisfaction (1 - 5)</label>
+                    <div class="range-container">
+                        <input type="range" id="Satisfaction Score" name="Satisfaction Score" min="1" max="5" value="3" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Satisfaction Score_val">3</span>
+                    </div>
+                </div>
+
+                <!-- Engagement Rating -->
+                <div class="form-group">
+                    <label for="Engagement Score">Employee Engagement (1 - 5)</label>
+                    <div class="range-container">
+                        <input type="range" id="Engagement Score" name="Engagement Score" min="1" max="5" value="3" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Engagement Score_val">3</span>
+                    </div>
+                </div>
+
+                <!-- Work Life Balance -->
+                <div class="form-group">
+                    <label for="Work-Life Balance Score">Work-Life Balance (1 - 5)</label>
+                    <div class="range-container">
+                        <input type="range" id="Work-Life Balance Score" name="Work-Life Balance Score" min="1" max="5" value="3" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Work-Life Balance Score_val">3</span>
+                    </div>
+                </div>
+
+                <!-- Training Duration -->
+                <div class="form-group">
+                    <label for="Training Duration(Days)">Onboarding Training Duration (Days)</label>
+                    <div class="range-container">
+                        <input type="range" id="Training Duration(Days)" name="Training Duration(Days)" min="1" max="10" value="3" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Training Duration(Days)_val">3</span>
+                    </div>
+                </div>
+
+                <!-- Training Cost -->
+                <div class="form-group full-width">
+                    <label for="Training Cost">Direct Training Cost ($)</label>
+                    <div class="range-container">
+                        <input type="range" id="Training Cost" name="Training Cost" min="100" max="3000" step="50" value="750" oninput="updateRangeVal(this)">
+                        <span class="range-value" id="Training Cost_val">750</span>
+                    </div>
+                </div>
+
+                <!-- Department -->
+                <div class="form-group">
+                    <label for="DepartmentType">Department</label>
+                    <select id="DepartmentType" name="DepartmentType">
+                        <option value="Production       ">Production</option>
+                        <option value="Sales">Sales</option>
+                        <option value="IT/IS">IT/IS</option>
+                        <option value="Executive Office">Executive Office</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Admin Offices">Admin Offices</option>
+                    </select>
+                </div>
+
+                <!-- Business Unit -->
+                <div class="form-group">
+                    <label for="BusinessUnit">Business Unit</label>
+                    <select id="BusinessUnit" name="BusinessUnit">
+                        <option value="CCDR">CCDR</option>
+                        <option value="EW">EW</option>
+                        <option value="PL">PL</option>
+                        <option value="TNS">TNS</option>
+                        <option value="BPC">BPC</option>
+                        <option value="WBL">WBL</option>
+                        <option value="NEL">NEL</option>
+                        <option value="SVG">SVG</option>
+                        <option value="MSC">MSC</option>
+                        <option value="PYZ">PYZ</option>
+                    </select>
+                </div>
+
+                <!-- Employee Type -->
+                <div class="form-group">
+                    <label for="EmployeeType">Employment Type</label>
+                    <select id="EmployeeType" name="EmployeeType">
+                        <option value="Full-Time">Full-Time</option>
+                        <option value="Part-Time">Part-Time</option>
+                        <option value="Contract">Contract</option>
+                    </select>
+                </div>
+
+                <!-- Pay Zone -->
+                <div class="form-group">
+                    <label for="PayZone">Pay Zone</label>
+                    <select id="PayZone" name="PayZone">
+                        <option value="Zone A">Zone A (Base)</option>
+                        <option value="Zone B">Zone B (Mid)</option>
+                        <option value="Zone C">Zone C (High)</option>
+                    </select>
+                </div>
+
+                <!-- Marital Status -->
+                <div class="form-group">
+                    <label for="MaritalDesc">Marital Status</label>
+                    <select id="MaritalDesc" name="MaritalDesc">
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                    </select>
+                </div>
+
+                <!-- Training Program -->
+                <div class="form-group">
+                    <label for="Training Program Name">Training Program</label>
+                    <select id="Training Program Name" name="Training Program Name">
+                        <option value="Leadership Development">Leadership Development</option>
+                        <option value="Customer Service">Customer Service</option>
+                        <option value="Project Management">Project Management</option>
+                        <option value="Technical Skills">Technical Skills</option>
+                        <option value="Communication Skills">Communication Skills</option>
+                    </select>
+                </div>
+
+                <!-- Hidden / Helper inputs to ensure complete categories are mapped correctly -->
+                <input type="hidden" name="RaceDesc" value="White">
+                <input type="hidden" name="EmployeeClassificationType" value="Full-Time">
+                <input type="hidden" name="Training Type" value="Internal">
+                <input type="hidden" name="GenderCode" value="Male">
+
+                <!-- Submit Button -->
+                <button type="button" class="btn-predict" onclick="calculateAttritionRisk()">Analyze Retention & Attrition Risk</button>
+            </form>
+        </section>
+
+        <!-- Results Section -->
+        <section class="section-card">
+            <h2 class="section-title">Strategic Churn Risk Assessment</h2>
+            
+            <!-- Empty state prior to prediction -->
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>Adjust parameters and click "Analyze Retention & Attrition Risk" to evaluate churn probability and get tactical HR recommendations.</p>
+            </div>
+
+            <!-- Result breakdown -->
+            <div id="resultsContainer" class="results-container" style="display: none;">
+                <!-- Gauge chart section -->
+                <div class="gauge-section">
+                    <div class="gauge-outer">
+                        <svg class="gauge-svg">
+                            <circle class="gauge-bg" cx="90" cy="90" r="70"></circle>
+                            <circle class="gauge-fill" id="gaugeFill" cx="90" cy="90" r="70"></circle>
+                        </svg>
+                        <div class="gauge-text">
+                            <span class="gauge-percentage" id="gaugePercentage">0%</span>
+                            <span class="gauge-label">Attrition Risk</span>
+                        </div>
+                    </div>
+                    <div class="risk-badge" id="riskBadge">LOW RISK</div>
+                </div>
+
+                <!-- Risk Factors Breakdown -->
+                <h3 class="factors-title">Top Drivers Contribution Breakdown</h3>
+                <div class="factors-list">
+                    <!-- Factor Item 1 -->
+                    <div class="factor-item">
+                        <div class="factor-header">
+                            <span class="factor-name">Tenure Risk Factor</span>
+                            <span class="factor-value" id="tenureVal">+0.00</span>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill" id="tenureBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Factor Item 2 -->
+                    <div class="factor-item">
+                        <div class="factor-header">
+                            <span class="factor-name">Employee Age Vulnerability</span>
+                            <span class="factor-value" id="ageVal">+0.00</span>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill" id="ageBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Factor Item 3 -->
+                    <div class="factor-item">
+                        <div class="factor-header">
+                            <span class="factor-name">Satisfaction & Balance Impact</span>
+                            <span class="factor-value" id="satisfactionVal">+0.00</span>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill" id="satisfactionBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Factor Item 4 -->
+                    <div class="factor-item">
+                        <div class="factor-header">
+                            <span class="factor-name">Engagement Level</span>
+                            <span class="factor-value" id="engagementVal">+0.00</span>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill" id="engagementBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Factor Item 5 -->
+                    <div class="factor-item">
+                        <div class="factor-header">
+                            <span class="factor-name">Onboarding & L&D Investment</span>
+                            <span class="factor-value" id="trainingVal">+0.00</span>
+                        </div>
+                        <div class="factor-bar-bg">
+                            <div class="factor-bar-fill" id="trainingBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actionable Advice -->
+                <div class="advice-box">
+                    <div class="advice-title" id="adviceTitle">Tactical HR Recommendations</div>
+                    <div id="adviceText">Please predict attrition risk to view recommendations.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function updateRangeVal(slider) {
+            document.getElementById(slider.id + '_val').innerText = slider.value;
+        }
+
+        async function calculateAttritionRisk() {
+            const form = document.getElementById('advisorForm');
+            const formData = new FormData(form);
+            const data = {};
+            
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            try {
+                // Fetch prediction from server
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Hide empty state and show results
+                    document.getElementById('emptyState').style.display = 'none';
+                    const container = document.getElementById('resultsContainer');
+                    container.style.display = 'flex';
+                    setTimeout(() => container.classList.add('active'), 50);
+
+                    // Update Churn Gauge
+                    const prob = result.churn_probability;
+                    const percentage = Math.round(prob * 100);
+                    document.getElementById('gaugePercentage').innerText = percentage + '%';
+                    
+                    // 440 is the circle circumference (2 * pi * r)
+                    const dashoffset = 440 - (440 * prob);
+                    const fillCircle = document.getElementById('gaugeFill');
+                    fillCircle.style.strokeDashoffset = dashoffset;
+                    
+                    // Update risk badge and gauge color based on risk level
+                    const badge = document.getElementById('riskBadge');
+                    if (result.risk_level === 'High Risk') {
+                        badge.innerText = 'HIGH CHURN RISK';
+                        badge.className = 'risk-badge risk-high';
+                        fillCircle.style.stroke = 'var(--danger-accent)';
+                    } else {
+                        badge.innerText = 'STABLE / LOW RISK';
+                        badge.className = 'risk-badge risk-low';
+                        fillCircle.style.stroke = 'var(--safe-accent)';
+                    }
+
+                    // Update Factor contributions
+                    updateFactorBar('tenure', result.contributions["Tenure Impact"]);
+                    updateFactorBar('age', result.contributions["Age Impact"]);
+                    updateFactorBar('satisfaction', result.contributions["Satisfaction & Balance"]);
+                    updateFactorBar('engagement', result.contributions["Engagement & Morale"]);
+                    updateFactorBar('training', result.contributions["Training Investment"]);
+
+                    // Update advice dynamically
+                    generateAdvice(percentage, data, result.contributions);
+                } else {
+                    alert('Prediction error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+
+        function updateFactorBar(id, val) {
+            const valEl = document.getElementById(id + 'Val');
+            const barEl = document.getElementById(id + 'Bar');
+            
+            // Format coefficient contribution text
+            valEl.innerText = (val >= 0 ? '+' : '') + val.toFixed(3);
+            
+            // Map contribution weight (-1.5 to +1.5 range) to a bar percentage (0% to 100%)
+            // Negative values (good for retention) get green, positive values (risk) get coral
+            let mappedWidth = Math.min(Math.max((Math.abs(val) / 1.5) * 100, 5), 100);
+            barEl.style.width = mappedWidth + '%';
+            
+            if (val >= 0) {
+                barEl.style.backgroundColor = 'var(--danger-accent)';
+                valEl.style.color = 'var(--danger-accent)';
+            } else {
+                barEl.style.backgroundColor = 'var(--safe-accent)';
+                valEl.style.color = 'var(--safe-accent)';
+            }
+        }
+
+        function generateAdvice(percentage, inputData, contributions) {
+            let title = "";
+            let text = "";
+            
+            if (percentage >= 50) {
+                title = "Critical Retention At-Risk Intervention Required";
+                
+                // Construct recommendations based on what drivers have positive coefficients (risk drivers)
+                let tenureYear = parseFloat(inputData['Tenure']);
+                let satisfaction = parseInt(inputData['Satisfaction Score']);
+                let cost = parseFloat(inputData['Training Cost']);
+                
+                let recs = [];
+                if (tenureYear < 2) {
+                    recs.push("Schedule an <strong>Early Career Sync</strong>. This employee has short tenure and is at risk of onboarding turnover.");
+                } else if (tenureYear > 7) {
+                    recs.push("Review <strong>Senior Leadership Pathways</strong> or retirement transition benefits. High tenure calls for structured progression updates.");
+                }
+                
+                if (satisfaction <= 2) {
+                    recs.push("Conduct a <strong>Job Satisfaction Audit</strong>. Satisfaction is extremely low; check manager relations or load alignment.");
+                }
+                
+                if (cost < 500) {
+                    recs.push("Increase <strong>Onboarding & Upskilling Budgets</strong>. Lower training investment is statistically linked to early resignations.");
+                }
+                
+                if (recs.length === 0) {
+                    recs.push("Review compensation pay zones and schedule a dedicated one-on-one feedback sync to check general engagement.");
+                }
+                
+                text = "This employee has a <strong>" + percentage + "% churn probability</strong>. We recommend taking the following actions:<br><ul style='margin-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;'>" + 
+                       recs.map(r => "<li>" + r + "</li>").join("") + "</ul>";
+            } else {
+                title = "Employee Profile is Stable";
+                text = "The employee exhibits a low churn risk of <strong>" + percentage + "%</strong>. The primary retention driver is their <strong>Tenure Impact</strong>. Continue standard career progression syncs and support high satisfaction levels.";
+            }
+            
+            document.getElementById('adviceTitle').innerText = title;
+            document.getElementById('adviceText').innerHTML = text;
+        }
+    </script>
+</body>
+</html>
