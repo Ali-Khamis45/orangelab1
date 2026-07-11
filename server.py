@@ -1,6 +1,7 @@
 import os
 import json
 import pickle
+import datetime
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, send_from_directory
@@ -79,13 +80,56 @@ def predict():
             "Training Investment": contributions.get("Training Cost", 0.0) + contributions.get("Training Duration(Days)", 0.0)
         }
         
+        # Determine confidence score (probability of the predicted class)
+        confidence = float(prob if prediction == 1 else (1.0 - prob))
+        
+        # Assign risk category
+        if prob >= 0.70:
+            risk_cat = "Critical Risk"
+        elif prob >= 0.50:
+            risk_cat = "High Risk"
+        elif prob >= 0.30:
+            risk_cat = "Moderate Risk"
+        else:
+            risk_cat = "Low Risk"
+            
+        # Generate dynamic explanation sentence
+        sorted_contribs = sorted(display_contribs.items(), key=lambda x: x[1], reverse=True)
+        top_pos = next((name for name, val in sorted_contribs if val > 0.02), None)
+        top_neg = next((name for name, val in reversed(sorted_contribs) if val < -0.02), None)
+        
+        explanation_parts = []
+        if prediction == 1:
+            explanation_parts.append(f"Attrition predicted with {confidence*100:.1f}% confidence.")
+            if top_pos:
+                explanation_parts.append(f"The primary driver increasing risk is {top_pos}.")
+            if top_neg:
+                explanation_parts.append(f"This is partially mitigated by protective factors in {top_neg}.")
+        else:
+            explanation_parts.append(f"Retention predicted with {confidence*100:.1f}% confidence.")
+            if top_neg:
+                explanation_parts.append(f"The primary protective factor is {top_neg}.")
+            if top_pos:
+                explanation_parts.append(f"Minor risk is introduced by {top_pos}.")
+                
+        explanation = " ".join(explanation_parts) if explanation_parts else "Prediction is stable with baseline metrics."
+        
+        # Generate timestamp and model version info
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        model_ver = "Tuned Gradient Boosting Classifier v2.0"
+        
         # Return response
         return jsonify({
             'status': 'success',
             'churn_probability': prob,
             'prediction': prediction,
             'contributions': display_contribs,
-            'risk_level': 'High Risk' if prob >= 0.5 else 'Low Risk'
+            'risk_level': 'High Risk' if prob >= 0.5 else 'Low Risk',
+            'confidence_score': confidence,
+            'risk_category': risk_cat,
+            'explanation': explanation,
+            'prediction_timestamp': timestamp,
+            'model_version': model_ver
         })
         
     except Exception as e:
