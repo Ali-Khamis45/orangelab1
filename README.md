@@ -11,6 +11,8 @@ An end-to-end data cleaning, exploratory data analysis (EDA), and machine learni
 ## 🖥️ Interactive Web Dashboard (Advisor UI)
 To make the machine learning models actionable for HR managers and business leaders, we built a premium web-based **Talent Attrition Advisor Dashboard**. This single-page application connects to a Flask backend serving the pre-trained, class-balanced machine learning model.
 
+![Talent Attrition Advisor UI Dashboard](static/ui_screenshot.webp)
+
 ### Key Features:
 * **Interactive Profile Form:** Input employee parameters (Age, Tenure, Satisfaction, Engagement, Work-Life Balance, Training Budgets, Departments, and Business Units).
 * **Live Attrition Risk Gauge:** Displays the probability of churn (0% to 100%) in a smooth, color-coded gauge ring (Green for Low Risk, Coral for High Risk).
@@ -64,9 +66,9 @@ To make the machine learning models actionable for HR managers and business lead
 - **Advanced Feature Engineering:** Extracted `Age` and `Tenure` (employment duration in years) from raw timestamps.
 - **Attrition Target:** Defined a binary target `Is_Terminated` (1 if terminated, 0 if active).
 - **Class Balancing:** Addressed the 87% / 13% class imbalance using `class_weight='balanced'` in training.
-- **Classification Modeling:** Trained balanced Logistic Regression and Random Forest Classifiers.
-- **Key Metrics:** Balanced Logistic Regression achieved an **excellent ROC-AUC of 0.8121** and a **recall of 78% for attrition**, successfully flagging 78% of employees at risk of leaving!
-- **Feature Importances & ROC Curves:** Plotted side-by-side ROC curve comparisons and a barplot showing the top 10 Random Forest feature importances.
+- **Classification Modeling:** Trained balanced Logistic Regression, Random Forest, and Gradient Boosting Classifiers.
+- **Key Metrics:** The deployed Tuned Gradient Boosting model achieved a **recall of 75% for attrition** and an **ROC-AUC of 0.8078**, successfully flagging 75% of employees at risk of leaving!
+- **Feature Importances & ROC Curves:** Plotted side-by-side ROC curve comparisons and a barplot showing the top 10 Gradient Boosting feature importances.
 
 ---
 
@@ -83,7 +85,7 @@ The model identified the top structural drivers of employee churn:
 ## 🏢 Strategic HR Recommendations
 1. **Design Milestone-Based Interventions:** Focus retention check-ins at critical tenure milestones (e.g. standard reviews at 1 year and 3 years) when employees are statistically most likely to leave.
 2. **Tailor Mentorship for Younger Hires:** Since younger age is a primary driver of churn, establish clear career progression paths and peer mentorship for early-career hires.
-3. **Implement Churn Dashboard:** Deploy the **Balanced Logistic Regression model** as a retention warning tool. Since it successfully flags **78% of potential resignations**, HR can proactively offer salary reviews, work-life balance adjustments, or department changes before high-risk employees resign.
+3. **Implement Churn Dashboard:** Deploy the **Tuned Gradient Boosting Classifier model** as a retention warning tool. Since it successfully flags **75% of potential resignations**, HR can proactively offer salary reviews, work-life balance adjustments, or department changes before high-risk employees resign.
 
 ---
 
